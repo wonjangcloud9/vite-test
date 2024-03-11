@@ -2,18 +2,51 @@ import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { setLocalStorage } from "./utils";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { isDarkAtom } from "./atoms";
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-color: ${(props) => props.theme.backgroundColor};
+  color: ${(props) => props.theme.color};
+  height: 100vh;
 `;
 
-const Subject = styled.h2`
-  font-size: 20px;
+interface NameProps {
+  isDark?: boolean;
+}
+
+const Subject = styled.div<NameProps>`
+  font-size: 22px;
   margin: 10px 0;
   text-align: start;
+  color: ${(props) => (props.isDark ? "white" : "black")};
+`;
+
+const CountryListContainer = styled.div``;
+
+const CountryList = styled.ul`
+  list-style: none;
+  padding: 0;
+  text-align: start;
+  width: 400px;
+`;
+
+const CountryItem = styled.li`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  margin-bottom: 10px;
+`;
+
+const CountryName = styled.div<NameProps>`
+  width: 30%;
+  color: ${(props) => (props.isDark ? "white" : "black")};
 `;
 
 interface Country {
@@ -24,6 +57,8 @@ interface Country {
 export default function App() {
   const [countries, setCountries] = useState<Country[]>([]);
   const countryInput = useForm();
+  const isDark = useRecoilValue(isDarkAtom);
+  const setDark = useSetRecoilState(isDarkAtom);
 
   useEffect(() => {
     const localCountries = JSON.parse(
@@ -32,9 +67,19 @@ export default function App() {
     setCountries(localCountries);
   }, []);
 
+  const toggleDark = () => {
+    setDark((prev) => !prev);
+  };
+
   return (
-    <Container>
-      <Subject>내가 가고싶은 나라들</Subject>
+    <Container
+      theme={{
+        backgroundColor: isDark ? "transparent" : "white",
+        color: isDark ? "white" : "transparent",
+      }}
+    >
+      <button onClick={toggleDark}>{isDark ? "☀️" : "🌊"}</button>
+      <Subject isDark={isDark}>내가 가고싶은 나라들</Subject>
       <form
         onSubmit={countryInput.handleSubmit((data) => {
           setCountries([...countries, { name: data.country, type: "want" }]);
@@ -64,177 +109,132 @@ export default function App() {
           가자!!
         </button>
       </form>
-      <ul
-        style={{
-          listStyle: "none",
-          padding: "0",
-          textAlign: "start",
-          width: "300px",
-        }}
-      >
-        {countries.map(
-          (country, index) =>
-            country.type === "want" && (
-              <li
-                key={index}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  width: "100%",
-                  height: "40px",
-                  marginBottom: "10px",
-                }}
-              >
-                <div>{country.name}</div>
-                <button
-                  onClick={() => {
-                    setCountries(
-                      countries.map((c, i) =>
-                        i === index ? { ...c, type: "been" } : c
-                      )
-                    );
-                    setLocalStorage(
-                      "countries",
-                      JSON.stringify(
+      <CountryListContainer>
+        <CountryList>
+          {countries.map(
+            (country, index) =>
+              country.type === "want" && (
+                <CountryItem key={index}>
+                  <CountryName isDark={isDark}>{country.name}</CountryName>
+                  <button
+                    onClick={() => {
+                      setCountries(
                         countries.map((c, i) =>
                           i === index ? { ...c, type: "been" } : c
                         )
-                      )
-                    );
-                  }}
-                >
-                  🛫
-                </button>
-                <button
-                  onClick={() => {
-                    setCountries(countries.filter((_, i) => i !== index));
-                    setLocalStorage(
-                      "countries",
-                      JSON.stringify(countries.filter((_, i) => i !== index))
-                    );
-                  }}
-                >
-                  🗑️
-                </button>
-              </li>
-            )
-        )}
-      </ul>
-      <Subject>내가 가본 나라들</Subject>
-      <ul
-        style={{
-          listStyle: "none",
-          padding: "0",
-          textAlign: "start",
-          width: "300px",
-        }}
-      >
-        {countries.map(
-          (country, index) =>
-            country.type === "been" && (
-              <li
-                key={index}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  width: "100%",
-                  height: "40px",
-                  marginBottom: "10px",
-                }}
-              >
-                <div>{country.name}</div>
-                <button
-                  onClick={() => {
-                    setCountries(
-                      countries.map((c, i) =>
-                        i === index ? { ...c, type: "like" } : c
-                      )
-                    );
-                    setLocalStorage(
-                      "countries",
-                      JSON.stringify(
+                      );
+                      setLocalStorage(
+                        "countries",
+                        JSON.stringify(
+                          countries.map((c, i) =>
+                            i === index ? { ...c, type: "been" } : c
+                          )
+                        )
+                      );
+                    }}
+                  >
+                    🛫
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCountries(countries.filter((_, i) => i !== index));
+                      setLocalStorage(
+                        "countries",
+                        JSON.stringify(countries.filter((_, i) => i !== index))
+                      );
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </CountryItem>
+              )
+          )}
+        </CountryList>
+      </CountryListContainer>
+
+      <CountryListContainer>
+        <Subject isDark={isDark}>내가 가본 나라들</Subject>
+        <CountryList>
+          {countries.map(
+            (country, index) =>
+              country.type === "been" && (
+                <CountryItem key={index}>
+                  <CountryName isDark={isDark}>{country.name}</CountryName>
+                  <button
+                    onClick={() => {
+                      setCountries(
                         countries.map((c, i) =>
                           i === index ? { ...c, type: "like" } : c
                         )
-                      )
-                    );
-                  }}
-                >
-                  ❤️
-                </button>
-                <button
-                  onClick={() => {
-                    setCountries(
-                      countries.map((c, i) =>
-                        i === index ? { ...c, type: "want" } : c
-                      )
-                    );
-                    setLocalStorage(
-                      "countries",
-                      JSON.stringify(
+                      );
+                      setLocalStorage(
+                        "countries",
+                        JSON.stringify(
+                          countries.map((c, i) =>
+                            i === index ? { ...c, type: "like" } : c
+                          )
+                        )
+                      );
+                    }}
+                  >
+                    ❤️
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCountries(
                         countries.map((c, i) =>
                           i === index ? { ...c, type: "want" } : c
                         )
-                      )
-                    );
-                  }}
-                >
-                  ❌
-                </button>
-                ️
-              </li>
-            )
-        )}
-      </ul>
-      <Subject>내가 좋아하는 나라들</Subject>
-      <ul
-        style={{
-          listStyle: "none",
-          padding: "0",
-          textAlign: "start",
-          width: "300px",
-        }}
-      >
-        {countries.map(
-          (country, index) =>
-            country.type === "like" && (
-              <li
-                key={index}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  width: "100%",
-                  height: "40px",
-                  marginBottom: "10px",
-                }}
-              >
-                <div>{country.name}</div>
-                <button
-                  onClick={() => {
-                    setCountries(
-                      countries.map((c, i) =>
-                        i === index ? { ...c, type: "been" } : c
-                      )
-                    );
-                    setLocalStorage(
-                      "countries",
-                      JSON.stringify(
+                      );
+                      setLocalStorage(
+                        "countries",
+                        JSON.stringify(
+                          countries.map((c, i) =>
+                            i === index ? { ...c, type: "want" } : c
+                          )
+                        )
+                      );
+                    }}
+                  >
+                    ❌
+                  </button>
+                </CountryItem>
+              )
+          )}
+        </CountryList>
+      </CountryListContainer>
+      <CountryListContainer>
+        <Subject isDark={isDark}>내가 좋아하는 나라들</Subject>
+        <CountryList>
+          {countries.map(
+            (country, index) =>
+              country.type === "like" && (
+                <CountryItem key={index}>
+                  <CountryName isDark={isDark}>{country.name}</CountryName>
+                  <button
+                    onClick={() => {
+                      setCountries(
                         countries.map((c, i) =>
                           i === index ? { ...c, type: "been" } : c
                         )
-                      )
-                    );
-                  }}
-                >
-                  🛫
-                </button>
-              </li>
-            )
-        )}
-      </ul>
+                      );
+                      setLocalStorage(
+                        "countries",
+                        JSON.stringify(
+                          countries.map((c, i) =>
+                            i === index ? { ...c, type: "been" } : c
+                          )
+                        )
+                      );
+                    }}
+                  >
+                    🛫
+                  </button>
+                </CountryItem>
+              )
+          )}
+        </CountryList>
+      </CountryListContainer>
     </Container>
   );
 }
