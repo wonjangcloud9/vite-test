@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { setLocalStorage } from "./utils";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { isDarkAtom } from "./atoms";
@@ -56,6 +56,7 @@ interface Country {
 
 export default function App() {
   const [countries, setCountries] = useState<Country[]>([]);
+  const [errorText, setErrorText] = useState<string>("");
   const countryInput = useForm();
   const isDark = useRecoilValue(isDarkAtom);
   const setDark = useSetRecoilState(isDarkAtom);
@@ -71,6 +72,41 @@ export default function App() {
     setDark((prev) => !prev);
   };
 
+  const moveCountry = (index: number, type: string) => {
+    setCountries(countries.map((c, i) => (i === index ? { ...c, type } : c)));
+    setLocalStorage(
+      "countries",
+      JSON.stringify(
+        countries.map((c, i) => (i === index ? { ...c, type } : c))
+      )
+    );
+  };
+
+  const removeCountry = (index: number) => {
+    setCountries(countries.filter((_, i) => i !== index));
+    setLocalStorage(
+      "countries",
+      JSON.stringify(countries.filter((_, i) => i !== index))
+    );
+  };
+
+  const onSubmit = (data: Record<string, string>) => {
+    if (!data.country) {
+      setErrorText("국가명을 입력해주세요.");
+      return;
+    }
+
+    if (countries.some((country) => country.name === data.country)) {
+      setErrorText("이미 등록된 국가입니다.");
+      return;
+    }
+
+    setCountries([...countries, { name: data.country, type: "want" }]);
+    countryInput.reset();
+    setLocalStorage("countries", JSON.stringify(countries));
+    setErrorText("");
+  };
+
   return (
     <Container
       theme={{
@@ -81,11 +117,10 @@ export default function App() {
       <button onClick={toggleDark}>{isDark ? "☀️" : "🌊"}</button>
       <Subject isDark={isDark}>내가 가고싶은 나라들</Subject>
       <form
-        onSubmit={countryInput.handleSubmit((data) => {
-          setCountries([...countries, { name: data.country, type: "want" }]);
-          countryInput.reset();
-          setLocalStorage("countries", JSON.stringify(countries));
-        })}
+        onSubmit={(e: FormEvent) => {
+          e.preventDefault();
+          onSubmit(countryInput.getValues());
+        }}
       >
         <input
           {...countryInput.register("country", {
@@ -98,6 +133,7 @@ export default function App() {
             borderRadius: "10px",
           }}
         />
+        {errorText && <div>{errorText}</div>}
         <button
           type="submit"
           style={{
@@ -118,30 +154,14 @@ export default function App() {
                   <CountryName isDark={isDark}>{country.name}</CountryName>
                   <button
                     onClick={() => {
-                      setCountries(
-                        countries.map((c, i) =>
-                          i === index ? { ...c, type: "been" } : c
-                        )
-                      );
-                      setLocalStorage(
-                        "countries",
-                        JSON.stringify(
-                          countries.map((c, i) =>
-                            i === index ? { ...c, type: "been" } : c
-                          )
-                        )
-                      );
+                      moveCountry(index, "been");
                     }}
                   >
                     🛫
                   </button>
                   <button
                     onClick={() => {
-                      setCountries(countries.filter((_, i) => i !== index));
-                      setLocalStorage(
-                        "countries",
-                        JSON.stringify(countries.filter((_, i) => i !== index))
-                      );
+                      removeCountry(index);
                     }}
                   >
                     🗑️
@@ -162,38 +182,14 @@ export default function App() {
                   <CountryName isDark={isDark}>{country.name}</CountryName>
                   <button
                     onClick={() => {
-                      setCountries(
-                        countries.map((c, i) =>
-                          i === index ? { ...c, type: "like" } : c
-                        )
-                      );
-                      setLocalStorage(
-                        "countries",
-                        JSON.stringify(
-                          countries.map((c, i) =>
-                            i === index ? { ...c, type: "like" } : c
-                          )
-                        )
-                      );
+                      moveCountry(index, "like");
                     }}
                   >
                     ❤️
                   </button>
                   <button
                     onClick={() => {
-                      setCountries(
-                        countries.map((c, i) =>
-                          i === index ? { ...c, type: "want" } : c
-                        )
-                      );
-                      setLocalStorage(
-                        "countries",
-                        JSON.stringify(
-                          countries.map((c, i) =>
-                            i === index ? { ...c, type: "want" } : c
-                          )
-                        )
-                      );
+                      moveCountry(index, "want");
                     }}
                   >
                     ❌
@@ -213,19 +209,7 @@ export default function App() {
                   <CountryName isDark={isDark}>{country.name}</CountryName>
                   <button
                     onClick={() => {
-                      setCountries(
-                        countries.map((c, i) =>
-                          i === index ? { ...c, type: "been" } : c
-                        )
-                      );
-                      setLocalStorage(
-                        "countries",
-                        JSON.stringify(
-                          countries.map((c, i) =>
-                            i === index ? { ...c, type: "been" } : c
-                          )
-                        )
-                      );
+                      moveCountry(index, "been");
                     }}
                   >
                     🛫
