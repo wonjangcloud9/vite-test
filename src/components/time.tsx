@@ -1,6 +1,7 @@
 import { useRecoilValue } from "recoil";
 import styled from "styled-components";
 import { time } from "../atoms";
+import { motion } from "framer-motion";
 
 const TimeContainer = styled.div`
   font-size: 60px;
@@ -11,14 +12,15 @@ const TimeContainer = styled.div`
   align-items: center;
 `;
 
-const Card = styled.div`
-  background-color: rgba(0, 0, 0, 0.3);
+const Card = styled(motion.div)`
+  background-color: white;
   border-radius: 10px;
   padding: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  color: rgb(226, 56, 26);
 `;
 
 const Separator = styled.div`
@@ -36,9 +38,23 @@ export const Time = () => {
   const seconds = timeValue % 60;
   return (
     <TimeContainer>
-      <Card>{minutes}</Card>
+      <Card
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1.1, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        key={minutes}
+      >
+        {minutes}
+      </Card>
       <Separator>:</Separator>
-      <Card>{seconds >= 10 ? seconds : `0${seconds}`}</Card>
+      <Card
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1.1, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        key={seconds}
+      >
+        {seconds >= 10 ? seconds : `0${seconds}`}
+      </Card>
     </TimeContainer>
   );
 };
