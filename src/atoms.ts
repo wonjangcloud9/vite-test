@@ -15,7 +15,7 @@ export const rounds = atom({
   default: 0,
 });
 
-export const goal = atom({
-  key: "goal",
-  default: 12,
+export const goals = atom({
+  key: "goals",
+  default: 0,
 });

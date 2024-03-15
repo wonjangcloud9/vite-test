@@ -3,7 +3,7 @@ import styled from "styled-components";
 const HeaderContainer = styled.header`
   font-size: 36px;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin: 80px 0;
 `;
 
 export const Header = () => {
