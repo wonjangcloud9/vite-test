@@ -16,6 +16,7 @@ const Card = styled(motion.div)`
   background-color: white;
   border-radius: 10px;
   padding: 20px;
+  width: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -42,16 +43,16 @@ export const Time = () => {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1.1, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        key={minutes}
+        key={`${minutes}-minutes`}
       >
-        {minutes}
+        {minutes >= 10 ? minutes : `0${minutes}`}
       </Card>
       <Separator>:</Separator>
       <Card
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1.1, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        key={seconds}
+        key={`${seconds}-seconds`}
       >
         {seconds >= 10 ? seconds : `0${seconds}`}
       </Card>

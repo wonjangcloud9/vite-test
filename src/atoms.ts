@@ -2,7 +2,7 @@ import { atom } from "recoil";
 
 export const time = atom({
   key: "time",
-  default: 1500,
+  default: 60 * 25 * 1,
 });
 
 export const isRunning = atom({

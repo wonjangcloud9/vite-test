@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import styled from "styled-components";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { isRunning, time, rounds, goals } from "../atoms";
@@ -48,9 +50,7 @@ export const Play = () => {
 
     if (!isRunningValue) {
       timerRef.current = setInterval(() => {
-        setTimeValue((prevTime) => {
-          return prevTime - 1;
-        });
+        setTimeValue((prevTime) => prevTime - 1);
       }, 1000);
     } else {
       clearInterval(timerRef.current);
@@ -69,7 +69,6 @@ export const Play = () => {
         setRounds((prev) => prev + 1);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeValue]);
 
   return (
@@ -78,7 +77,7 @@ export const Play = () => {
       whileHover={{ scale: 1.2 }}
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.2 }}
     >
       {isRunningValue ? (
         <PauseBtn
